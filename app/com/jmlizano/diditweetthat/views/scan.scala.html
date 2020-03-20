@@ -1,0 +1,44 @@
+@import helper._
+
+<html>
+<head>
+    <title>Did I tweet that?</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="@routes.Assets.at("javascripts/scan.js")"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/scan.css")">
+</head>
+<body>
+<div class="maindiv">
+    <div class="title">
+        <h1>Did I tweet that?</h1>
+    </div>
+    <div class="foundtweets">
+        <h2>Found X tweets</h2>
+    </div>
+    <div class="searchwords">
+        <div class="keyword-container" id="keyword-container">
+            <span class='dashfolio-keyword'>drunk</span>
+        </div>
+        <input type="text" value="" placeholder="Add a keyword" id="add-keyword-input" />
+    </div>
+    <div class="sentimentSliderContainer">
+        <input type="range" min="0" max="5" value="2" class="sentimentSlider" id="sentimentSlider">
+    </div>
+    <div class="tweets">
+        <div class="tweetsTable">
+            <table id="tweetsTable" class="display">
+                <thead>
+                    <tr>
+                        <th>Tweet</th>
+                        <th>Date</th>
+                        <th>Sentiment</th>
+                        <th>FilteredText</th>
+                    </tr>
+                </thead>
+            </table>
+         </div>
+    </div>
+</div>
+</body>

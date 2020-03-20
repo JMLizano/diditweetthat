@@ -1,0 +1,33 @@
+@import helper._
+@import com.jmlizano.diditweetthat.controllers.UserForm
+
+@(postForm: Form[UserForm])(implicit request: MessagesRequestHeader)
+
+<html>
+<head>
+    <title>Did I tweet that?</title>
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/main.css")">
+</head>
+<body>
+<div>
+    <div class="title-wrapper">
+        <h1>Did<br> I tweet<br> that?</h1>
+        <h2>
+            Get rid of those possible shameful tweets that lie around in your timeline
+        </h2>
+    </div>
+    <div class="form-wrapper">
+        <div class="form-center-wrapper">
+            @helper.form(action = com.jmlizano.diditweetthat.controllers.routes.HomeController.scan()) {
+                @inputText(postForm("user"), 'placeholder -> "@youruser", 'class -> "userForm")
+                <div class="scan-button">
+                    <input type="submit" value="Scan" class="big blue button">
+                    <br>
+                    Enter your twitter username to start the scanning
+                </div>
+            }
+        </div>
+    </div>
+</div>
+</body>
+</html>
