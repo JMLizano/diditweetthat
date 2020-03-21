@@ -13,12 +13,12 @@ import scala.util.{Failure, Success, Try}
 object Twitter {
   import scala.concurrent.duration._
 
-  case class simpleTweet(id: Long, id_str: String, text: String, created_at: Instant)
+  case class rawTweet(id: Long, id_str: String, text: String, created_at: Instant)
 
   val client = TwitterRestClient()
 
   // TODO: Consider implementing as an iterator
-  def TimelineStream(user: String, max_id: Future[Option[Long]] = Future.successful { Some(Long.MaxValue - 1) }): LazyList[Future[Seq[simpleTweet]]] = {
+  def TimelineStream(user: String, max_id: Future[Option[Long]] = Future.successful { Some(Long.MaxValue - 1) }): LazyList[Future[Seq[rawTweet]]] = {
     val current_max_id = Await.result(max_id, Duration.Inf)
     current_max_id match {
       case Some(0) => LazyList.empty // No more tweets to retrieve
@@ -37,8 +37,8 @@ object Twitter {
     }
   }
 
-  def getAllTweetsInTimeline(user: String) : Future[Seq[simpleTweet]] = {
-    def getTimelineRecursive(user: String, max_id: Option[Long]): Future[Seq[simpleTweet]]  = {
+  def getAllTweetsInTimeline(user: String) : Future[Seq[rawTweet]] = {
+    def getTimelineRecursive(user: String, max_id: Option[Long]): Future[Seq[rawTweet]]  = {
       getTimeline(user, max_id).map { tweets=>
         println(s"Got ${tweets.length} tweets")
         if (tweets.nonEmpty) {
@@ -61,20 +61,20 @@ object Twitter {
     getTimelineRecursive(user, None)
   }
 
-  def getTimeline(user: String, max_id: Option[Long] = None): Future[Seq[simpleTweet]] = {
+  def getTimeline(user: String, max_id: Option[Long] = None): Future[Seq[rawTweet]] = {
     println(s"Querying for $max_id")
     client
       .userTimelineForUser(screen_name=user, max_id=max_id, exclude_replies=true, trim_user=true, include_rts=false)
       .map { ratedData: RatedData[Seq[Tweet]] =>
-        ratedData.data.map(tweet => simpleTweet(tweet.id, tweet.id_str, tweet.text, tweet.created_at))
+        ratedData.data.map(tweet => rawTweet(tweet.id, tweet.id_str, tweet.text, tweet.created_at))
       }
   }
 
-  def deleteTweet(tweet_id: Long): Future[simpleTweet] = {
+  def deleteTweet(tweet_id: Long): Future[rawTweet] = {
     client
       .deleteTweet(id = tweet_id)
       .map { tweet =>
-        simpleTweet(tweet.id, tweet.id_str, tweet.text, tweet.created_at)
+        rawTweet(tweet.id, tweet.id_str, tweet.text, tweet.created_at)
       }
   }
 

@@ -77,7 +77,7 @@ $(function() {
             element.text,
             element.created_at,
             element.sentiment,
-            element.text
+            element.cleaned_text
         ]).draw( false );
       }
     });

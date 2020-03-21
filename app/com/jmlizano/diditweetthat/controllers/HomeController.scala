@@ -1,7 +1,7 @@
 package com.jmlizano.diditweetthat.controllers
 
 import com.jmlizano.diditweetthat.TwitterAnalyzer
-import com.jmlizano.diditweetthat.TwitterAnalyzer.{badTweetCollection}
+import com.jmlizano.diditweetthat.TwitterAnalyzer.{processedTweetCollection}
 import com.jmlizano.diditweetthat.TwitterAnalyzer.Formatters._
 
 import scala.concurrent.ExecutionContext
@@ -52,7 +52,7 @@ class HomeController @Inject()(
             case false => None
             case true => Some(992357979549782015L)
           }
-          val tweets: badTweetCollection = TwitterAnalyzer.getBadTweets(user, max_id)
+          val tweets: processedTweetCollection = TwitterAnalyzer.getprocessedTweets(user, max_id)
           Ok(Json.toJson(tweets))
   }
 
