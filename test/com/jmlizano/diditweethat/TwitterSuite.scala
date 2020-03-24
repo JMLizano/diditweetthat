@@ -1,32 +1,38 @@
 package diditweethat
 
+import akka.actor.ActorSystem
+import akka.stream.scaladsl.Sink
+
 import scala.concurrent.{Await, Future}
 import org.scalatest.funsuite.{AnyFunSuite, AsyncFunSuite}
 import diditweetthat.Twitter
-import diditweetthat.Twitter.simpleTweet
+import diditweetthat.Twitter.rawTweet
 
 
 class TwitterSuite extends AsyncFunSuite {
 
   test("getTimeline should return some tweets for the user") {
-    val timeline: Future[Seq[simpleTweet]] = Twitter.getTimeline("twitterapi")
+    val timeline: Future[Seq[rawTweet]] = Twitter.getTimeline("twitterapi")
     timeline.map { tweets =>
       assert(tweets.nonEmpty)
     }
   }
 
   test("TimelineStream should return all tweets for the user") {
-    import scala.concurrent.duration._
+    implicit val system = ActorSystem()
 
-    val timeline: LazyList[Future[Seq[simpleTweet]]] = Twitter.TimelineStream("twitterapi")
+    val futureDate = "2999-01-01T00:00:00Z"
+    val timeline = Twitter.TimelineStream("twitterapi")
     val firstTweet = timeline
-      .map(tweetChunk => Await.result(tweetChunk, Duration.Inf))
-      .fold(Seq.empty) { (tweetChunk: Seq[simpleTweet], nextTweetChunk: Seq[simpleTweet]) =>
-        tweetChunk ++ nextTweetChunk
-      }.minBy(tweet => tweet.created_at)
+      .map(_.minBy(_.created_at))
+      .fold(futureDate)((min_date, tweet) => {
+        val tweet_date = tweet.created_at.toString
+        if(tweet_date < min_date) tweet_date else min_date
+      }).runWith(Sink.last)
     // This is not the first tweet for twitterapi, but seems like the standard API
     // does not go further back in time
-    assert(firstTweet.created_at.toString == "2009-05-08T18:54:09Z")
+    firstTweet.map { value => assert( value == "2009-05-08T18:54:09Z") }
+
   }
 
 }

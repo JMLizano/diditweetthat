@@ -1,8 +1,8 @@
 package com.jmlizano.diditweetthat.controllers
 
 import com.jmlizano.diditweetthat.TwitterAnalyzer
-import com.jmlizano.diditweetthat.TwitterAnalyzer.{processedTweetCollection}
-import com.jmlizano.diditweetthat.TwitterAnalyzer.Formatters._
+import com.jmlizano.diditweetthat.TwitterAnalyzer.writers._
+import com.jmlizano.diditweetthat.TwitterAnalyzer.{processedTweet, processedTweetCollection}
 
 import scala.concurrent.ExecutionContext
 import javax.inject._
@@ -46,14 +46,15 @@ class HomeController @Inject()(
   }
 
   def doScan(user: String, test: Boolean = false) = messagesAction {
+
         implicit request: MessagesRequest[AnyContent] =>
           logger.trace("process: ")
           val max_id = test match {
             case false => None
             case true => Some(992357979549782015L)
           }
-          val tweets: processedTweetCollection = TwitterAnalyzer.getprocessedTweets(user, max_id)
-          Ok(Json.toJson(tweets))
+          val tweets = TwitterAnalyzer.getProcessedTweets(user, max_id).map { Json.toJson(_) }
+          Ok.chunked(tweets)
   }
 
 }

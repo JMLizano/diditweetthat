@@ -10,10 +10,10 @@ var tweetsTable = $('#tweetsTable').DataTable({
 // https://datatables.net/examples/plug-ins/range_filtering.html
 $.fn.dataTable.ext.search.push(
     function( settings, data, dataIndex ) {
-        var min = parseInt( $('#sentimentSlider').val(), 10 );
+        var max = parseInt( $('#sentimentSlider').val(), 10 );
         var sentiment = parseFloat( data[2] ) || 0; // use data for the sentiment column
 
-        if ( min <= sentiment ) return true
+        if ( sentiment <= max ) return true
         return false;
     }
 );
@@ -71,16 +71,29 @@ $(function() {
     // TWEETS API CALL
 
     var urlParams = new URLSearchParams(window.location.search);
-    $.get("/api/v1/scan/" + urlParams.get('user'), function(data) {
-      for (let element of data.tweets) {
-        tweetsTable.row.add([
-            element.text,
-            element.created_at,
-            element.sentiment,
-            element.cleaned_text
-        ]).draw( false );
-      }
-    });
+    var decoder = new TextDecoder();
+
+    fetch("/api/v1/scan/" + urlParams.get('user'))
+        .then( (response) => { console.log(response); return response.body.getReader(); })
+        .then( reader => {
+            function processChunk() {
+                reader.read().then( ({ done, value }) => {
+                    if (done) return;
+
+                    let tweets = JSON.parse(decoder.decode(value, {stream: true})).tweets;
+                    for (let element of tweets) {
+                        tweetsTable.row.add([
+                            element.text,
+                            element.created_at,
+                            element.sentiment,
+                            element.cleaned_text
+                        ]).draw( false );
+                    }
+                    return processChunk();
+                });
+            }
+            return processChunk();
+        });
 });
 
 });

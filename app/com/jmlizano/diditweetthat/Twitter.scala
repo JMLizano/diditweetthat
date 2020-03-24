@@ -1,13 +1,13 @@
 package diditweetthat
 
-import java.time.Instant
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
+import java.time.Instant
+
+import akka.NotUsed
+import akka.stream.scaladsl.Source
 import com.danielasfregola.twitter4s.TwitterRestClient
 import com.danielasfregola.twitter4s.entities.{RatedData, Tweet}
-
-import scala.util.{Failure, Success, Try}
 
 
 object Twitter {
@@ -17,14 +17,31 @@ object Twitter {
 
   val client = TwitterRestClient()
 
+  def TimelineStream(user: String, max_id: Option[Long] = None): Source[Seq[rawTweet], NotUsed] = {
+    Source.unfoldAsync(max_id) { current_max_id =>
+      val nextChunkFuture =  getTimeline(user, current_max_id)
+      nextChunkFuture.map { chunk =>
+        if (chunk.isEmpty) None
+        else {
+          // Subtract 1 to last id to avoid overlapping
+          val next_max_id = Some(chunk.minBy(tweet => tweet.id).id - 1)
+          Some(next_max_id, chunk)
+        }
+      }
+    }
+  }
+
   // TODO: Consider implementing as an iterator
-  def TimelineStream(user: String, max_id: Future[Option[Long]] = Future.successful { Some(Long.MaxValue - 1) }): LazyList[Future[Seq[rawTweet]]] = {
+  def TimelineStreamLazyList(
+    user: String,
+    max_id: Future[Option[Long]] = Future.successful { Some(Long.MaxValue - 1) }
+  ): LazyList[Future[Seq[rawTweet]]] = {
     val current_max_id = Await.result(max_id, Duration.Inf)
-    current_max_id match {
+   current_max_id match {
       case Some(0) => LazyList.empty // No more tweets to retrieve
-      case _ => {
+      case current_max_id => {
         val TweetChunk = getTimeline(user, current_max_id)
-        val restOfTweets = TimelineStream(
+        val restOfTweets = TimelineStreamLazyList(
           user,
           TweetChunk.map { tweets =>
             // Subtract 1 to last id to avoid overlapping
@@ -35,30 +52,6 @@ object Twitter {
         TweetChunk #:: restOfTweets
       }
     }
-  }
-
-  def getAllTweetsInTimeline(user: String) : Future[Seq[rawTweet]] = {
-    def getTimelineRecursive(user: String, max_id: Option[Long]): Future[Seq[rawTweet]]  = {
-      getTimeline(user, max_id).map { tweets=>
-        println(s"Got ${tweets.length} tweets")
-        if (tweets.nonEmpty) {
-          // There are still more tweets on the user timeline
-          val current_max_id = Some(tweets.minBy(t => t.id).id - 1)
-          try {
-            val restOfTweets = Await.result(getTimelineRecursive(user, current_max_id), Duration.Inf)
-            tweets ++ restOfTweets
-          } catch {
-            case e: java.util.concurrent.TimeoutException =>  {
-              println(s"Timeout at $max_id")
-              tweets
-            }
-          }
-        } else {
-          tweets
-        }
-      }
-    }
-    getTimelineRecursive(user, None)
   }
 
   def getTimeline(user: String, max_id: Option[Long] = None): Future[Seq[rawTweet]] = {

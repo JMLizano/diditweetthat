@@ -3,17 +3,19 @@ package com.jmlizano.diditweetthat
 import scala.util.matching.Regex
 import java.time.Instant
 
+import akka.NotUsed
+import akka.stream.scaladsl.Source
 import diditweetthat.Twitter.rawTweet
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, JsValue, Json, Writes}
 import edu.stanford.nlp.pipeline.CoreNLPProtos
 import diditweetthat.{TweetSentiment, Twitter}
 
 
 trait hashtagRemover {
-  val hashtagPattern: Regex = "#([^ ]*)".r
+  lazy val hashtagPattern: Regex = "#([^ ]*)".r
 
   def removeHashtags(text: String): String = {
     hashtagPattern.replaceAllIn(text, "")
@@ -21,37 +23,56 @@ trait hashtagRemover {
 }
 
 trait urlRemover {
-  val urlPattern: Regex = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)".r
+  lazy val urlPattern: Regex = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)".r
 
   def removeUrls(text: String): String = {
     urlPattern.replaceAllIn(text, "")
   }
 }
 
-object TwitterAnalyzer extends urlRemover with hashtagRemover {
+trait badWordsFilter {
+  import scala.io.Source
 
+  lazy val badWords: List[String] =  {
+    val bufferedSource = Source.fromFile("conf/bad-words.txt")
+    val lines = bufferedSource.getLines.toList
+    bufferedSource.close
+    lines
+  }
+
+  def containsBadWords(text: String): Boolean =  {
+    println(badWords.find(text.contains))
+    badWords.exists(text.contains)
+  }
+
+}
+
+object TwitterAnalyzer extends urlRemover with hashtagRemover with badWordsFilter {
 
   case class processedTweet(id: String, text: String, created_at: Instant, sentiment: Int, cleaned_text: String)
-  case class processedTweetCollection(tweets: Seq[processedTweet])
+  case class processedTweetCollection(tweets: Seq[processedTweet]) // Necessary since Seq has no apply function (required for JSON encoding)
 
-  object Formatters {
+  object writers {
     // Necessary to render the JSON response in the controller
-    implicit val processedTweetFormatter: Format[processedTweet] = Json.format[processedTweet]
-    implicit val processedTweetCollectionFormatter: Format[processedTweetCollection] = Json.format[processedTweetCollection]
+    // Json.writes instead of Json.format
+    implicit val processedTweetFormatter = Json.writes[processedTweet]
+    implicit val processedTweetCollectionWrites: Writes[processedTweetCollection] = Json.writes[processedTweetCollection]
   }
 
-  def getprocessedTweets(user: String, max_id: Option[Long] = None): processedTweetCollection = {
-    val tweetsStream = Twitter.TimelineStream(user,  Future.successful(max_id))
-    val filteredTweets = tweetsStream
-      .map(tweetChunk => Await.result(tweetChunk, Duration.Inf))
-      .flatMap(tweetChunk => tweetChunk.map {
-        case rawTweet(id, id_str, text, created_at) => {
-          val cleanedText = removeHashtags(removeUrls(text))
-          val sentiment = TweetSentiment.mainSentiment(cleanedText).getNumber
-          processedTweet(id_str, text, created_at, sentiment, cleanedText)
-        }
-      })
-    processedTweetCollection(filteredTweets)
+  def processRawTweet(tweet: rawTweet): processedTweet = {
+    val rawText = tweet.text
+    val cleanedText = removeHashtags(removeUrls(rawText))
+    val sentiment = TweetSentiment.mainSentiment(cleanedText).getNumber
+    processedTweet(tweet.id_str, rawText, tweet.created_at, sentiment, cleanedText)
   }
 
+  def getProcessedTweets(user: String, max_id: Option[Long] = None): Source[processedTweetCollection, NotUsed]= {
+    val tweetsStream = Twitter.TimelineStream(user, max_id)
+    tweetsStream.map { tweetChunk =>
+      val badTweets =  tweetChunk
+          .withFilter(tweet => containsBadWords(tweet.text))
+          .map(processRawTweet)
+      processedTweetCollection(badTweets)
+    }
+  }
 }
