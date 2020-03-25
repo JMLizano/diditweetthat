@@ -8,22 +8,25 @@
     text-align: center;
 }
 
-.title {
-    height: 10%;
+.filters {
+    width: 25%;
+    height: 100%;
+    float:left;
     background-color:#78B6FB;
-    text-align: center;
-    color: white;
-    margin:0;
-    padding:0;
-}
-
-h1 {
-    font-size: 60px;
-    font-family: Montserrat, sans-serif;
 }
 
 .foundtweets {
-    margin:20px 0px 0px 0px;
+    margin:20px 0px 0px 10px;
+    height: 20%;
+    max-width: 90%;
+}
+
+pre {
+  display: block;
+  font-family: monospace;
+  margin: 1em 0;
+  white-space: pre-wrap;
+  text-align:left;
 }
 
 .searchwords {
@@ -33,7 +36,7 @@ h1 {
 }
 
 .keyword-container {
-  max-width: 50%; /* helps wrap the tags in a specific width */
+  max-width: 70%; /* helps wrap the tags in a specific width */
   max-height: 100px;
   text-align: center;
   margin: auto;
@@ -70,53 +73,35 @@ h1 {
   border:0;
   margin:6px 6px 6px 0px ; /* t r b l */
   padding:5px;
-  width: 30%;
+  width: 70%;
   height: 30%;
 }
 
 .sentimentSliderContainer {
   width: 100%; /* Width of the outside container */
-  height: 10%;
-  margin:20px 0px 0px 0px;
+  height: 60%;
+  text-align: left;
+  margin: auto;
 }
 
 .sentimentSlider {
-  -webkit-appearance: none;
-  width: 30%;
-  height: 15px;
+  -webkit-appearance: slider-vertical;
   border-radius: 5px;
   background: #d3d3d3;
   outline: none;
   opacity: 0.8;
   -webkit-transition: .2s;
   transition: opacity .2s;
+  height: 50%
 }
 
-.sentimentSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #4CAF50;
-  cursor: pointer;
+.range-labels {
+  padding: 0;
+  list-style: none;
+
+  li {
+    float: right:
+  }
 }
 
-.sentimentSlider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #4CAF50;
-  cursor: pointer;
-}
-
-.tweets {
-    height: 60%;
-    margin:20px 0px 50px 0px;
-    text-align: center;
-}
-
-.tweetsTable {
-    width: 70%;
-    margin: auto;
 }

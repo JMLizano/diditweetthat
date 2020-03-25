@@ -5,26 +5,40 @@
     <title>Did I tweet that?</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-    <script src="@routes.Assets.at("javascripts/scan.js")"></script>
+<!--    <script src="@routes.Assets.at("javascripts/scan.js")"></script>-->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/scan.css")">
 </head>
 <body>
 <div class="maindiv">
-    <div class="title">
-        <h1>Did I tweet that?</h1>
-    </div>
-    <div class="foundtweets">
-        <h2>Found X tweets</h2>
-    </div>
-    <div class="searchwords">
-        <div class="keyword-container" id="keyword-container">
-            <span class='dashfolio-keyword'>drunk</span>
+    <div class="filters">
+        <div class="foundtweets">
+            <h2>Advanced search</h2>
+            <pre>Here you refine the search parameters for your tweets. You have two filters available:</pre>
+            <ul>
+                <li><pre>Keywords: You can type any keyword and only tweets containing that word will be shown.</pre></li>
+                <li><pre>Sentiment: You can select the maximum sentiment score. The sentiment indicates how positive / negative a tweet content is. It goes from 0 (very negative) to 4 (very postive)</pre></li>
+            </ul>
         </div>
-        <input type="text" value="" placeholder="Add a keyword" id="add-keyword-input" />
-    </div>
-    <div class="sentimentSliderContainer">
-        <input type="range" min="0" max="5" value="2" class="sentimentSlider" id="sentimentSlider">
+        <div class="searchwords">
+            <div class="keyword-container" id="keyword-container">
+                <span class='dashfolio-keyword'>drunk</span>
+            </div>
+            <input type="text" value="" placeholder="Add a keyword" id="add-keyword-input" />
+        </div>
+        <div class="sentimentSliderContainer">
+            <input type="range" min="0" max="4" value="2" class="sentimentSlider" id="sentimentSlider">
+            <label id="rangeText" >test</label>
+            <ul class="range-labels">
+                <li class="active selected">Today</li>
+                <li>2 days</li>
+                <li>3 days</li>
+                <li>4 days</li>
+                <li>5 days</li>
+                <li>6 days</li>
+                <li>7 days</li>
+            </ul>
+        </div>
     </div>
     <div class="tweets">
         <div class="tweetsTable">

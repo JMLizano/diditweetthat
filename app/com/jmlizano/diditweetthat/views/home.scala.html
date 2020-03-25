@@ -10,22 +10,30 @@
 </head>
 <body>
 <div>
-    <div class="title-wrapper">
-        <h1>Did<br> I tweet<br> that?</h1>
-        <h2>
-            Get rid of those possible shameful tweets that lie around in your timeline
-        </h2>
-    </div>
-    <div class="form-wrapper">
-        <div class="form-center-wrapper">
-            @helper.form(action = com.jmlizano.diditweetthat.controllers.routes.HomeController.scan()) {
-                @inputText(postForm("user"), 'placeholder -> "@youruser", 'class -> "userForm")
-                <div class="scan-button">
-                    <input type="submit" value="Scan" class="big blue button">
-                    <br>
-                    Enter your twitter username to start the scanning
-                </div>
-            }
+    <div class="main-wrapper">
+        <div class="title-wrapper">
+            <h1>Did<br> I tweet<br> that?</h1>
+            <h2>
+                Get rid of those possible shameful tweets that lie around in your timeline
+            </h2>
+        </div>
+        <div class="form-wrapper">
+            <div class="form-center-wrapper">
+                @helper.form(action = com.jmlizano.diditweetthat.controllers.routes.HomeController.scan()) {
+                    @inputText(
+                        postForm("user"),
+                        'placeholder -> "@youruser",
+                        'class -> "userForm",
+                        '_label -> null,
+                        '_showConstraints -> false
+                    )
+                    <div class="scan-button">
+                        <input type="submit" value="Scan" class="big blue button">
+                        <br>
+                        <p class="form-subtext">Enter your twitter username (without the "&#64;") to start the scanning</p>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
