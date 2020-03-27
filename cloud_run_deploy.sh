@@ -12,7 +12,9 @@ docker tag ${IMAGE_NAME}:$VERSION eu.gcr.io/${PROJECT}/${IMAGE_NAME}:$VERSION
 docker push eu.gcr.io/${PROJECT}/${IMAGE_NAME}:$VERSION
 
 ## Deploy to cloud run
-source .env # This file contains all required secrets
+source .env || true # This file contains all required secrets
+APPLICATION_SECRET=$(head -c 32 /dev/urandom | base64)
+
 gcloud run deploy diditweethat \
   --image eu.gcr.io/${PROJECT}/${IMAGE_NAME}:$VERSION \
   --platform managed \
