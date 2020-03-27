@@ -1,5 +1,6 @@
 package diditweetthat
 
+import scala.jdk.CollectionConverters._
 import java.util.Properties
 
 import edu.stanford.nlp.ling.CoreAnnotations
@@ -9,7 +10,6 @@ import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations
 import edu.stanford.nlp.util.CoreMap
 
-import scala.jdk.CollectionConverters._
 
 object TweetSentiment {
 

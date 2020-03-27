@@ -1,10 +1,10 @@
-name := """diditweetthat"""
+name := "diditweetthat"
 organization := "com.jmlizano"
-version := "1.0-SNAPSHOT"
+maintainer := "jmlizlac@gmail.com"
+version := "0.1-SNAPSHOT"
 scalaVersion := "2.13.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
-//lazy val root = (project in file("."))
 
 resolvers += Resolver.sonatypeRepo("releases")
 
@@ -14,11 +14,6 @@ libraryDependencies ++= Seq(
     "edu.stanford.nlp" % "stanford-corenlp" % "3.9.2" artifacts (Artifact("stanford-corenlp", "models"), Artifact("stanford-corenlp")),
     "org.scalatest" %% "scalatest" % "3.1.1" % "test"
 )
+
 // Avoid dependency collision between Play and twitter4s
 dependencyOverrides += "com.typesafe.akka" %% "akka-http" % "10.1.11"
-
-// Adds additional packages into Twirl
-//TwirlKeys.templateImports += "com.jmlizano.controllers._"
-
-// Adds additional packages into conf/routes
-// play.sbt.routes.RoutesKeys.routesImport += "com.jmlizano.binders._"

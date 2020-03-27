@@ -5,13 +5,9 @@ import java.time.Instant
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import diditweetthat.Twitter.rawTweet
-
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
-import play.api.libs.json.{Format, JsValue, Json, Writes}
-import edu.stanford.nlp.pipeline.CoreNLPProtos
+import play.api.libs.json.{Json, Writes}
 import diditweetthat.{TweetSentiment, Twitter}
+import diditweetthat.Twitter.rawTweet
 
 
 trait hashtagRemover {
@@ -34,16 +30,13 @@ trait badWordsFilter {
   import scala.io.Source
 
   lazy val badWords: List[String] =  {
-    val bufferedSource = Source.fromFile("conf/bad-words.txt")
+    val bufferedSource = Source.fromResource("bad-words.txt")
     val lines = bufferedSource.getLines.toList
     bufferedSource.close
     lines
   }
 
-  def containsBadWords(text: String): Boolean =  {
-    println(badWords.find(text.contains))
-    badWords.exists(text.contains)
-  }
+  def containsBadWords(text: String): Boolean =  badWords.exists(text.contains)
 
 }
 

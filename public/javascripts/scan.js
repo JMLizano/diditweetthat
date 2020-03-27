@@ -111,14 +111,18 @@ $(document).ready(function(){
                     reader.read().then( ({ done, value }) => {
                         if (done) return;
 
-                        let tweets = JSON.parse(decoder.decode(value, {stream: true})).tweets;
-                        for (let element of tweets) {
-                            tweetsTable.row.add([
-                                element.text,
-                                new Date(element.created_at).toUTCString(),
-                                element.sentiment,
-                                element.cleaned_text
-                            ]).draw( false );
+                        // Can receive several responses at the same time, as concatenated JSONs
+                        let jsonArray = "[" + decoder.decode(value, {stream: true}).split("}{").join("},{") + "]";
+                        let tweetArrays = JSON.parse(jsonArray);
+                        for (let tweetArray of tweetArrays) {
+                            for (let element of tweetArray.tweets) {
+                                tweetsTable.row.add([
+                                    element.text,
+                                    new Date(element.created_at).toUTCString(),
+                                    element.sentiment,
+                                    element.cleaned_text
+                                ]).draw( false );
+                            }
                         }
                         return processChunk();
                     });

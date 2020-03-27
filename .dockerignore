@@ -1,0 +1,14 @@
+.g8
+.idea
+
+logs
+project/target
+project/project
+target
+test
+
+*.sh
+.gitignore
+.env*
+.dockerignore
+Dockerfile
