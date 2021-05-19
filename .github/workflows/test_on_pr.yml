@@ -4,12 +4,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  TWITTER_CONSUMER_TOKEN_KEY: ${{ secrets.TWITTER_CONSUMER_TOKEN_KEY }}
-  TWITTER_CONSUMER_TOKEN_SECRET: ${{ secrets.TWITTER_CONSUMER_TOKEN_SECRET }}
-  TWITTER_ACCESS_TOKEN_KEY: ${{ secrets.TWITTER_ACCESS_TOKEN_KEY }}
-  TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -25,3 +19,8 @@ jobs:
     
     - name: Run tests
       run: sbt test
+      env:
+        TWITTER_CONSUMER_TOKEN_KEY: ${{ secrets.TWITTER_CONSUMER_TOKEN_KEY }}
+        TWITTER_CONSUMER_TOKEN_SECRET: ${{ secrets.TWITTER_CONSUMER_TOKEN_SECRET }}
+        TWITTER_ACCESS_TOKEN_KEY: ${{ secrets.TWITTER_ACCESS_TOKEN_KEY }}
+        TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
